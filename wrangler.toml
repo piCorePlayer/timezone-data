@@ -1,0 +1,4 @@
+name = "timezone-worker"
+type = "javascript"
+account_id = "KEY"
+workers_dev = true # Deploy to workers.dev by default
