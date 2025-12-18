@@ -1,4 +1,4 @@
-const TIMEZONE_FILE_URL = "https://yourusername.github.io/cloudflare-timezone-worker/timezones.db";
+const TIMEZONE_FILE_URL = "https://picoreplayer.github.io/timezone-data/timezones.db";
 let olsonToLinuxTZ = {};
 
 // Function to load the timezones.db file from GitHub Pages
