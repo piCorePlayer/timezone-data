@@ -56,7 +56,7 @@ async function loadTimezoneData(kvNamespace) {
     }
   } catch (kvError) {
     // Log KV error but continue to fetch from URL
-    console.error("KV get error:", kvError.message);
+    console.error("Failed to retrieve timezone data from KV cache:", kvError.message);
   }
 
   // If not in KV, fetch from URL
@@ -77,7 +77,7 @@ async function loadTimezoneData(kvNamespace) {
     }
   } catch (kvError) {
     // Log KV error but don't fail the request
-    console.error("KV put error:", kvError.message);
+    console.error("Failed to cache timezone data in KV storage:", kvError.message);
   }
 
   return parsedData.mapping;
