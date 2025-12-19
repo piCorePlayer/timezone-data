@@ -24,7 +24,7 @@ async function loadTimezoneData() {
     // Parse the header comment to extract version and build date
     // Format: "# This file is based on iana.org tzdata 2025c built on 2025-12-19 01:09:27 UTC"
     if (line.startsWith("#") && line.includes("tzdata")) {
-      const match = line.match(/tzdata\s+(\S+)\s+built on\s+(.+)$/);
+      const match = line.match(/tzdata\s+(\S+)\s+built\s+on\s+(.+)$/);
       if (match) {
         tzDataVersion = match[1];
         tzDataBuild = match[2];
@@ -98,8 +98,8 @@ export default {
       Timezone: timezone, // Olson timezone from the `cf` data
       LinuxTZ: linuxTZ, // Resolved Linux Timezone string
       currentEpochTime: currentEpochTime, // Current epoch time
-      TZdata_Version: tzDataVersion, // IANA tzdata version
-      TZdata_Build: tzDataBuild, // Build date and time
+      TZdata_Version: tzDataVersion || null, // IANA tzdata version
+      TZdata_Build: tzDataBuild || null, // Build date and time
     };
 
     // Return the response as JSON
