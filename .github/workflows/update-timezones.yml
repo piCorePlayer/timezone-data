@@ -1,0 +1,104 @@
+name: Update Timezone Database
+
+on:
+  # Allow manual triggering
+  workflow_dispatch:
+  
+  # Run on a schedule (every Monday at 00:00 UTC)
+  schedule:
+    - cron: '0 0 * * 1'
+
+permissions:
+  contents: write
+
+jobs:
+  update-timezones:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget tzdata
+      
+      - name: Checkout update script from main branch
+        run: |
+          git fetch origin ${{ github.ref_name || 'main' }}
+          git checkout origin/${{ github.ref_name || 'main' }} -- update_timezones.py || \
+          git checkout origin/main -- update_timezones.py
+          chmod +x update_timezones.py
+      
+      - name: Generate timezones.db
+        run: |
+          python3 update_timezones.py
+      
+      - name: Validate timezones.db
+        run: |
+          # Check if file exists
+          if [ ! -f timezones.db ]; then
+            echo "Error: timezones.db was not generated"
+            exit 1
+          fi
+          
+          # Check if file has content
+          if [ ! -s timezones.db ]; then
+            echo "Error: timezones.db is empty"
+            exit 1
+          fi
+          
+          # Check if file has header comment
+          if ! head -n 1 timezones.db | grep -q "# This file is based on iana.org tzdata"; then
+            echo "Error: timezones.db missing expected header"
+            exit 1
+          fi
+          
+          # Check if file has at least 100 timezone entries (sanity check)
+          line_count=$(wc -l < timezones.db)
+          if [ "$line_count" -lt 100 ]; then
+            echo "Error: timezones.db has too few entries ($line_count lines)"
+            exit 1
+          fi
+          
+          # Verify format - each line should be either a comment or have timezone name and TZ string
+          if ! grep -v "^#" timezones.db | grep -v "^$" | head -5 | grep -qE "^[A-Za-z_/]+ "; then
+            echo "Error: timezones.db has invalid format"
+            exit 1
+          fi
+          
+          echo "Validation passed: timezones.db appears valid"
+          echo "Total lines: $line_count"
+          head -10 timezones.db
+      
+      - name: Clean up temporary files
+        run: |
+          rm -rf tzdata tzdata-latest.tar.gz update_timezones.py
+      
+      - name: Check for changes
+        id: check_changes
+        run: |
+          git diff --exit-code timezones.db || echo "changed=true" >> $GITHUB_OUTPUT
+      
+      - name: Commit and push changes
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add timezones.db
+          git commit -m "Update timezones.db from IANA tzdata"
+          git push
+      
+      - name: No changes detected
+        if: steps.check_changes.outputs.changed != 'true'
+        run: |
+          echo "No changes to timezones.db - already up to date"
