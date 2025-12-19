@@ -4,9 +4,9 @@ on:
   # Allow manual triggering
   workflow_dispatch:
   
-  # Run on a schedule (every Monday at 00:00 UTC)
+  # Run on a schedule (every Saturday at 2:00 AM UTC)
   schedule:
-    - cron: '0 0 * * 1'
+    - cron: '0 2 * * 6'
 
 permissions:
   contents: write
