@@ -19,21 +19,23 @@ The `timezones.db` file is automatically updated from IANA timezone data via a G
 ## How it Works
 
 1. Downloads the latest timezone data from `https://data.iana.org/time-zones/releases/tzdata-latest.tar.gz`
-2. Extracts and compiles the timezone files using the `zic` tool
-3. Parses the compiled timezone files to extract Linux TZ format strings
-4. Generates `timezones.db` with mappings from timezone names to TZ strings
-5. Validates the generated file has the expected format and content
-6. Commits changes to the `gh-pages` branch if the file has been updated
+2. Checks the version of the downloaded data against the existing `timezones.db` file
+3. If the version is the same, exits early (no update needed)
+4. If the version is different, extracts and compiles the timezone files using the `zic` tool
+5. Parses the compiled timezone files to extract Linux TZ format strings
+6. Generates `timezones.db` with mappings from timezone names to TZ strings
+7. Validates the generated file has the expected format and content
+8. Commits changes to the `gh-pages` branch if the file has been updated
 
 ## Format
 
 The `timezones.db` file contains:
-- A header comment indicating the IANA tzdata version
+- A header comment indicating the IANA tzdata version and build date
 - One timezone per line in the format: `Timezone/Name TZ_STRING`
 
 Example:
 ```
-# This file is based on iana.org tzdata 2025c
+# This file is based on iana.org tzdata 2025c built on 2025-12-19 00:35:20 UTC
 Africa/Abidjan GMT0
 Africa/Accra GMT0
 America/New_York EST5EDT,M3.2.0,M11.1.0

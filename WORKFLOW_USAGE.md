@@ -21,10 +21,11 @@ The workflow runs automatically every Monday at 00:00 UTC (midnight). No manual 
 
 1. **Checks out gh-pages branch** - Where the timezones.db file is stored
 2. **Downloads latest timezone data** - From https://data.iana.org/time-zones/releases/
-3. **Generates timezones.db** - Processes the data using the update_timezones.py script
-4. **Validates the file** - Ensures it has proper format and sufficient entries
-5. **Commits changes** - Only if the file has been updated
-6. **Cleans up** - Removes temporary files
+3. **Version check** - Compares downloaded version with existing file; skips update if unchanged
+4. **Generates timezones.db** - Processes the data using the update_timezones.py script (only if version changed)
+5. **Validates the file** - Ensures it has proper format and sufficient entries
+6. **Commits changes** - Only if the file has been updated
+7. **Cleans up** - Removes temporary files
 
 ## Validation Checks
 
@@ -46,8 +47,9 @@ If the workflow fails, check the Actions tab for error logs:
 ### File Not Updated
 
 If you run the workflow but the file doesn't change:
-- The timezone data hasn't been updated since the last run
-- Check the workflow run logs - should show "No changes to timezones.db - already up to date"
+- The timezone data version hasn't been updated since the last run
+- Check the workflow run logs - should show "Timezone data is already up to date (version XXXX). No update needed."
+- This is expected behavior and prevents unnecessary commits
 
 ### Local Testing
 
