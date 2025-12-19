@@ -4,6 +4,7 @@ import sys
 import re
 import subprocess
 import shutil
+from datetime import datetime, timezone
 
 # Clean up any existing files
 if os.path.exists('./tzdata'):
@@ -62,6 +63,27 @@ except FileNotFoundError:
     print("Error: version file not found in timezone data", file=sys.stderr)
     sys.exit(1)
 
+# Check if timezones.db already exists and compare versions
+existing_version = None
+if os.path.exists('timezones.db'):
+    try:
+        with open('timezones.db', 'r') as f:
+            first_line = f.readline().strip()
+            # Extract version from: "# This file is based on iana.org tzdata 2025c"
+            if 'tzdata' in first_line:
+                parts = first_line.split('tzdata')
+                if len(parts) > 1:
+                    # Extract version (format: "2025c" or "2025c built on ...")
+                    version_part = parts[1].strip().split()[0]
+                    existing_version = version_part
+    except Exception as e:
+        # If we can't read the existing file, continue with the update
+        pass
+
+if existing_version and existing_version == version:
+    print(f"Timezone data is already up to date (version {version}). No update needed.")
+    sys.exit(0)
+
 tzdata_dir = './tzdata/out/'
 if not os.path.exists(tzdata_dir):
     print("Error: Compiled timezone data directory not found", file=sys.stderr)
@@ -97,8 +119,9 @@ if len(timezones) == 0:
     sys.exit(1)
 
 # Sort timezones by name and format output
+build_date = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
 with open('timezones.db', 'w') as f:
-    f.write(f"# This file is based on iana.org tzdata {version}\n")
+    f.write(f"# This file is based on iana.org tzdata {version} built on {build_date}\n")
     for zone_name in sorted(timezones.keys()):
         f.write(f"{zone_name} {timezones[zone_name]}\n")
 
