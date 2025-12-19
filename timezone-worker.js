@@ -95,7 +95,7 @@ export default {
     // Load the timezone data if not already cached
     if (Object.keys(olsonToLinuxTZ).length === 0) {
       try {
-        olsonToLinuxTZ = await loadTimezoneData(env.KV_NAMESPACE);
+        olsonToLinuxTZ = await loadTimezoneData(env.TZ_NAMESPACE);
       } catch (e) {
         return new Response(
           JSON.stringify({
