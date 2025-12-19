@@ -15,7 +15,7 @@ if os.path.exists('tzdata-latest.tar.gz'):
 # Download latest timezone data
 try:
     subprocess.run(
-        ['wget', 'https://data.iana.org/time-zones/releases/tzdata-latest.tar.gz'],
+        ['wget', 'ftp://ftp.iana.org/tz/tzdata-latest.tar.gz'],
         check=True,
         capture_output=True
     )
