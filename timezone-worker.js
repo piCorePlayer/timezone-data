@@ -103,8 +103,9 @@ export default {
     };
 
     // Return the response as JSON
-    return new Response(JSON.stringify(data, null, 2), {
-      headers: { "Content-Type": "application/json" },
-    });
+//    return new Response(JSON.stringify(data, null, 2), {
+//      headers: { "Content-Type": "application/json" },
+//    });
+    return Response.json(data);
   },
 };
