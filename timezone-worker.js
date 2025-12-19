@@ -2,6 +2,8 @@ const TIMEZONE_FILE_URL = "https://picoreplayer.github.io/timezone-data/timezone
 
 // Cache the Olson-to-Linux TZ mapping in memory to avoid frequent lookups
 let olsonToLinuxTZ = {};
+let tzDataVersion = "";
+let tzDataBuild = "";
 
 // Fetch and parse the timezone data
 async function loadTimezoneData() {
@@ -15,8 +17,23 @@ async function loadTimezoneData() {
   const mapping = {};
 
   for (const line of lines) {
-    if (line.startsWith("#") || line.trim() === "") {
-      continue; // Skip comments and empty lines
+    if (line.trim() === "") {
+      continue; // Skip empty lines
+    }
+
+    // Parse the header comment to extract version and build date
+    // Format: "# This file is based on iana.org tzdata 2025c built on 2025-12-19 01:09:27 UTC"
+    if (line.startsWith("#") && line.includes("tzdata")) {
+      const match = line.match(/tzdata\s+(\S+)\s+built on\s+(.+)$/);
+      if (match) {
+        tzDataVersion = match[1];
+        tzDataBuild = match[2];
+      }
+      continue;
+    }
+
+    if (line.startsWith("#")) {
+      continue; // Skip other comments
     }
 
     const [olsonTimezone, linuxTZ] = line.split(" ");
@@ -81,6 +98,8 @@ export default {
       Timezone: timezone, // Olson timezone from the `cf` data
       LinuxTZ: linuxTZ, // Resolved Linux Timezone string
       currentEpochTime: currentEpochTime, // Current epoch time
+      TZdata_Version: tzDataVersion, // IANA tzdata version
+      TZdata_Build: tzDataBuild, // Build date and time
     };
 
     // Return the response as JSON
