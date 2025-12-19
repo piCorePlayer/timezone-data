@@ -1,5 +1,5 @@
 name = "timezone-worker"
-type = "javascript"
 main = "timezone-worker.js"
 account_id = "8d7dc6dd1cd1e42add5f137b3f18e204"
 workers_dev = true # Deploy to workers.dev by default
+compatibility_date = "2025-12-19"
