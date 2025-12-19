@@ -1,0 +1,21 @@
+name = "timezone-data"
+main = "timezone-worker.js"
+workers_dev = false
+compatibility_date = "2025-12-19"
+compatibility_flags = ["nodejs_compat"]
+preview_urls = false
+
+[observability]
+enabled = true
+head_sampling_rate = 1
+
+[[ ratelimits ]]
+name = "GEOIP_UPDATE_LIMITER"
+# An identifier you define, that is unique to your Cloudflare account.
+# Must be an integer.	
+namespace_id = "3451"
+
+# Limit: the number of tokens allowed within a given period in a single
+# Cloudflare location
+# Period: the duration of the period, in seconds. Must be either 10 or 60
+simple = { limit = 3, period = 60 }
