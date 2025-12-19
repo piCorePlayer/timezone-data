@@ -1,20 +1,18 @@
 const TIMEZONE_FILE_URL = "https://picoreplayer.github.io/timezone-data/timezones.db";
+const KV_CACHE_KEY = "timezones_db_data";
+const KV_CACHE_TTL = 86400; // 1 day in seconds
 
 // Cache the Olson-to-Linux TZ mapping in memory to avoid frequent lookups
 let olsonToLinuxTZ = {};
 let tzDataVersion = "";
 let tzDataBuild = "";
 
-// Fetch and parse the timezone data
-async function loadTimezoneData() {
-  const response = await fetch(TIMEZONE_FILE_URL);
-  if (!response.ok) {
-    throw new Error("Failed to fetch timezone data");
-  }
-
-  const text = await response.text();
+// Parse timezone data from text
+function parseTimezoneData(text) {
   const lines = text.split("\n");
   const mapping = {};
+  let version = "";
+  let build = "";
 
   for (const line of lines) {
     if (line.trim() === "") {
@@ -26,8 +24,8 @@ async function loadTimezoneData() {
     if (line.startsWith("#") && line.includes("tzdata")) {
       const match = line.match(/tzdata\s+(\S+)\s+built\s+on\s+(.+)$/);
       if (match) {
-        tzDataVersion = match[1];
-        tzDataBuild = match[2];
+        version = match[1];
+        build = match[2];
       }
       continue;
     }
@@ -40,7 +38,49 @@ async function loadTimezoneData() {
     mapping[olsonTimezone] = linuxTZ;
   }
 
-  return mapping;
+  return { mapping, version, build };
+}
+
+// Fetch and parse the timezone data with KV caching
+async function loadTimezoneData(kvNamespace) {
+  try {
+    // First, try to get data from KV storage
+    if (kvNamespace) {
+      const cachedData = await kvNamespace.get(KV_CACHE_KEY);
+      if (cachedData) {
+        const parsedData = parseTimezoneData(cachedData);
+        tzDataVersion = parsedData.version;
+        tzDataBuild = parsedData.build;
+        return parsedData.mapping;
+      }
+    }
+  } catch (kvError) {
+    // Log KV error but continue to fetch from URL
+    console.error("KV get error:", kvError.message);
+  }
+
+  // If not in KV, fetch from URL
+  const response = await fetch(TIMEZONE_FILE_URL);
+  if (!response.ok) {
+    throw new Error("Failed to fetch timezone data");
+  }
+
+  const text = await response.text();
+  const parsedData = parseTimezoneData(text);
+  tzDataVersion = parsedData.version;
+  tzDataBuild = parsedData.build;
+
+  // Cache the raw text in KV with expiration
+  try {
+    if (kvNamespace) {
+      await kvNamespace.put(KV_CACHE_KEY, text, { expirationTtl: KV_CACHE_TTL });
+    }
+  } catch (kvError) {
+    // Log KV error but don't fail the request
+    console.error("KV put error:", kvError.message);
+  }
+
+  return parsedData.mapping;
 }
 
 // Helper function to validate Linux TZ strings
@@ -51,11 +91,11 @@ function isValidLinuxTZ(tz) {
 
 // Main Cloudflare Worker logic
 export default {
-  async fetch(request) {
+  async fetch(request, env) {
     // Load the timezone data if not already cached
     if (Object.keys(olsonToLinuxTZ).length === 0) {
       try {
-        olsonToLinuxTZ = await loadTimezoneData();
+        olsonToLinuxTZ = await loadTimezoneData(env.KV_NAMESPACE);
       } catch (e) {
         return new Response(
           JSON.stringify({
