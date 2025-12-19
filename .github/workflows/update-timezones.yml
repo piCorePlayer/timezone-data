@@ -40,10 +40,13 @@ jobs:
           chmod +x update_timezones.py
       
       - name: Generate timezones.db
+        id: generate
         run: |
           python3 update_timezones.py
+        continue-on-error: false
       
       - name: Validate timezones.db
+        if: steps.generate.outcome == 'success'
         run: |
           # Check if file exists
           if [ ! -f timezones.db ]; then
