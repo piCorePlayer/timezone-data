@@ -74,7 +74,7 @@ jobs:
           fi
           
           # Verify format - each line should be either a comment or have timezone name and TZ string
-          if ! grep -v "^#" timezones.db | grep -v "^$" | head -5 | grep -qE "^[A-Za-z_/]+ "; then
+          if ! grep -v "^#" timezones.db | grep -v "^$" | sed -n '1,5p' | grep -qE "^[A-Za-z_/]+ "; then
             echo "Error: timezones.db has invalid format"
             exit 1
           fi
