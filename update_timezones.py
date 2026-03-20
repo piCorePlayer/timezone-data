@@ -53,7 +53,7 @@ timezones = {}
 # Pattern to extract Linux TZ format strings from compiled timezone files
 # This matches TZ strings like "EST5EDT,M3.2.0,M11.1.0" or "GMT0"
 # Format: Optional offset in angle brackets, followed by TZ abbreviations and rules
-pattern = re.compile(r'(?:\<[\+\-0-9]+\>)?([\+\-\,\.\/A-Z0-9]*)')
+pattern = re.compile(r'(?:\<[\+\-0-9]+\>)?([\+\-\,\.\/:A-Z0-9]*)')
 
 version = ''
 try:
