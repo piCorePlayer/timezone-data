@@ -34,15 +34,12 @@ jobs:
       
       - name: Checkout update script from main branch
         run: |
-          git fetch origin ${{ github.ref_name || 'main' }}
-          git checkout origin/${{ github.ref_name || 'main' }} -- update_timezones.py || \
-          git checkout origin/main -- update_timezones.py
-          chmod +x update_timezones.py
+          curl -sSf "https://raw.githubusercontent.com/${{ github.repository }}/main/update_timezones.py" -o $RUNNER_TEMP/update_timezones.py
       
       - name: Generate timezones.db
         id: generate
         run: |
-          python3 update_timezones.py
+          python3 $RUNNER_TEMP/update_timezones.py
         continue-on-error: false
       
       - name: Validate timezones.db
