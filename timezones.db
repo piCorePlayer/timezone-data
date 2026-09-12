@@ -1,4 +1,4 @@
-# This file is based on iana.org tzdata 2026c built on 2026-09-04 20:07:17 UTC
+# This file is based on iana.org tzdata 2026d built on 2026-09-12 06:58:36 UTC
 Africa/Abidjan GMT0
 Africa/Accra GMT0
 Africa/Addis_Ababa EAT-3
@@ -135,7 +135,7 @@ America/Indiana/Vevay EST5EDT,M3.2.0,M11.1.0
 America/Indiana/Vincennes EST5EDT,M3.2.0,M11.1.0
 America/Indiana/Winamac EST5EDT,M3.2.0,M11.1.0
 America/Indianapolis EST5EDT,M3.2.0,M11.1.0
-America/Inuvik MST7MDT,M3.2.0,M11.1.0
+America/Inuvik CST6
 America/Iqaluit EST5EDT,M3.2.0,M11.1.0
 America/Jamaica EST5
 America/Jujuy 3
